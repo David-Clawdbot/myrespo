@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Morandi Colors -->
+    <color name="morandi_soft_pink">#FFE8C4C4</color>
+    <color name="morandi_dusty_blue">#FF9BB7D4</color>
+    <color name="morandi_sage_green">#FF9DB4B0</color>
+    <color name="morandi_muted_orange">#FFD9A67C</color>
+    <color name="morandi_lavender">#FFC4A7D9</color>
+    <color name="morandi_warm_grey">#FFB8B8B8</color>
+    <color name="morandi_cream">#FFF5E6D3</color>
+    <color name="morandi_soft_beige">#FFE8DCC8</color>
+
+    <!-- App Theme Colors -->
+    <color name="primary">@color/morandi_soft_pink</color>
+    <color name="primary_dark">#FFD0A8A8</color>
+    <color name="secondary">@color/morandi_dusty_blue</color>
+    <color name="background">@color/morandi_cream</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_variant">#FFF8F4F0</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FF5C5C5C</color>
+    <color name="text_secondary">#FF888888</color>
+    <color name="text_hint">#FFAAAAAA</color>
+
+    <!-- Emotion Colors -->
+    <color name="emotion_happy">@color/morandi_muted_orange</color>
+    <color name="emotion_calm">@color/morandi_sage_green</color>
+    <color name="emotion_anxious">@color/morandi_lavender</color>
+    <color name="emotion_sad">@color/morandi_dusty_blue</color>
+    <color name="emotion_angry">@color/morandi_soft_pink</color>
+
+    <!-- Time-based Backgrounds -->
+    <color name="bg_morning">#FFFFF5E6</color>
+    <color name="bg_noon">#FFF0F4F8</color>
+    <color name="bg_evening">#FFF8F0E6</color>
+    <color name="bg_night">#FFEBF0F5</color>
+</resources>

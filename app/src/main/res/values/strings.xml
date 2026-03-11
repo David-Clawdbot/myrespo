@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">暖心树洞</string>
+
+    <!-- Main -->
+    <string name="select_emotion">选择你的心情</string>
+    <string name="start_chat">开始聊天</string>
+    <string name="meditation">冥想</string>
+    <string name="diary">情绪日记</string>
+    <string name="scenarios">场景陪伴</string>
+    <string name="profile">个人中心</string>
+
+    <!-- Emotions -->
+    <string name="emotion_happy">开心</string>
+    <string name="emotion_calm">平静</string>
+    <string name="emotion_anxious">焦虑</string>
+    <string name="emotion_sad">难过</string>
+    <string name="emotion_angry">愤怒</string>
+    <string name="emotion_confused">困惑</string>
+
+    <!-- AI Chat -->
+    <string name="ai_name">小暖</string>
+    <string name="message_input">想聊点什么...</string>
+    <string name="voice_input">语音输入</string>
+    <string name="send">发送</string>
+
+    <!-- Meditation -->
+    <string name="sleep_meditation">5分钟睡前冥想</string>
+    <string name="play">播放</string>
+    <string name="pause">暂停</string>
+    <string name="stop">停止</string>
+
+    <!-- Diary -->
+    <string name="today_mood">今天的心情</string>
+    <string name="write_diary">写日记</string>
+    <string name="save_diary">保存日记</string>
+    <string name="emotion_chart">情绪变化</string>
+
+    <!-- Scenarios -->
+    <string name="scenario_work">工作压力</string>
+    <string name="scenario_relationship">人际关系</string>
+    <string name="scenario_insomnia">失眠</string>
+    <string name="scenario_confused">迷茫</string>
+
+    <!-- Subscription -->
+    <string name="subscribe">订阅服务</string>
+    <string name="subscription_title">暖心树洞VIP</string>
+    <string name="subscription_price">99元/月</string>
+    <string name="subscription_benefits">包含：2次文字咨询、AI无限陪伴、冥想音频</string>
+    <string name="subscribe_now">立即订阅</string>
+
+    <!-- Reward -->
+    <string name="reward_island">情绪小岛</string>
+    <string name="consecutive_login">连续登录</string>
+    <string name="days_7">7天</string>
+    <string name="unlock_reward">解锁奖励</string>
+    <string name="voice_chat">语音倾诉</string>
+    <string name="minutes_15">15分钟</string>
+    <string name="redeem">兑换</string>
+
+    <!-- Time -->
+    <string name="time_morning">早晨</string>
+    <string name="time_noon">中午</string>
+    <string name="time_evening">傍晚</string>
+    <string name="time_night">夜晚</string>
+
+    <!-- Cloud Button -->
+    <string name="cloud_button">云朵按钮</string>
+</resources>
