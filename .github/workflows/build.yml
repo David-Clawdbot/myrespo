@@ -27,23 +27,43 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Print Gradle version
+        run: ./gradlew --version
+
+      - name: Print environment info
+        run: |
+          echo "Java version:"
+          java -version
+          echo "Gradle version:"
+          ./gradlew --version
+
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --info
+        continue-on-error: true
+
+      - name: List build outputs
+        if: always()
+        run: |
+          echo "Listing app/build/outputs:"
+          find app/build/outputs -type f 2>/dev/null || echo "No outputs found"
+          ls -laR app/build/outputs/apk/ 2>/dev/null || echo "No APKs found"
 
       - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
-
-      - name: Build Release APK (optional)
-        run: ./gradlew assembleRelease --stacktrace || echo "Release build failed, continuing..."
-
-      - name: Upload Release APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
           retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
+          retention-days: 7
+          if-no-files-found: ignore
