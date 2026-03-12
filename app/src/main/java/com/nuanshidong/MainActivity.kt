@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nuanshidong.config.AppConfig
 import com.nuanshidong.ui.components.CloudButton
 import com.nuanshidong.ui.components.LargeCloudButton
 import com.nuanshidong.ui.components.SmallCloudButton
@@ -42,6 +43,10 @@ import java.util.Calendar
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 初始化应用配置
+        AppConfig.init()
+
         setContent {
             NuanshidongTheme {
                 Surface(
