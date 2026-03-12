@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,8 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nuanshidong.ui.components.YarnBallAvatar
 import com.nuanshidong.ui.theme.*
+import com.nuanshidong.viewmodel.ChatViewModel
+import com.nuanshidong.viewmodel.ChatViewModelFactory
+import kotlinx.coroutines.launch
 
 /**
  * 聊天界面
@@ -25,8 +30,19 @@ fun ChatScreen(
     emotion: String,
     onBack: () -> Unit
 ) {
+    // TODO: 从配置或环境变量获取AI配置
+    val aiProvider = "doubao" // 或 "tongyi", "openai"
+    val apiKey = "" // TODO: 从配置文件读取
+
+    val viewModel: ChatViewModel = remember {
+        ChatViewModelFactory(aiProvider, apiKey, emotion).create()
+    }
+
+    val uiState by viewModel.uiState.collectAsState()
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
     var messageText by remember { mutableStateOf("") }
-    var messages by remember { mutableStateOf<List<ChatMessage>>(emptyList()) }
 
     Column(
         modifier = Modifier
@@ -44,6 +60,7 @@ fun ChatScreen(
 
         // 消息列表
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -51,10 +68,10 @@ fun ChatScreen(
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
             // 初始欢迎消息
-            if (messages.isEmpty()) {
+            if (uiState.messages.isEmpty()) {
                 item {
                     ChatBubble(
-                        message = ChatMessage(
+                        message = com.nuanshidong.viewmodel.ChatMessage(
                             sender = "ai",
                             text = getWelcomeMessage(emotion)
                         )
@@ -63,9 +80,21 @@ fun ChatScreen(
             }
 
             // 用户和AI消息
-            items(messages) { message ->
+            items(uiState.messages) { message ->
                 ChatBubble(message = message)
             }
+
+            // 加载指示器
+            if (uiState.isLoading) {
+                item {
+                    TypingIndicator()
+                }
+            }
+        }
+
+        // 自动滚动到底部
+        LaunchedEffect(uiState.messages.size, uiState.isLoading) {
+            listState.animateScrollToItem(listState.layoutInfo.totalItemsCount)
         }
 
         // 输入框
@@ -74,17 +103,89 @@ fun ChatScreen(
             onValueChange = { messageText = it },
             onSend = {
                 if (messageText.isNotBlank()) {
-                    // 用户消息
-                    messages = messages + ChatMessage(sender = "user", text = messageText)
-
-                    // AI回复（占位）
-                    val aiResponse = getAIResponse(emotion, messageText)
-                    messages = messages + ChatMessage(sender = "ai", text = aiResponse)
-
+                    viewModel.sendMessage(messageText)
                     messageText = ""
                 }
             }
         )
+
+        // 错误提示
+        if (uiState.error != null) {
+            ErrorBanner(
+                message = uiState.error ?: "发生错误",
+                onDismiss = { viewModel.clearError() }
+            )
+        }
+    }
+}
+
+/**
+ * 打字指示器
+ */
+@Composable
+private fun TypingIndicator() {
+    Row(
+        modifier = Modifier.padding(start = 48.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        for (i in 0..2) {
+            val delay = i * 100
+            val alpha by rememberInfiniteTransition(label = "typing")
+                .animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(600, delayMillis = delay),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "alpha$delay"
+                )
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            )
+        }
+    }
+}
+
+/**
+ * 错误横幅
+ */
+@Composable
+private fun ErrorBanner(
+    message: String,
+    onDismiss: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                style = MaterialTheme.typography.bodySmall
+            )
+            TextButton(onClick = onDismiss) {
+                Text("关闭", fontSize = 12.sp)
+            }
+        )
+    }
     }
 }
 
@@ -127,7 +228,7 @@ private fun ChatTopBar(
  * 聊天气泡
  */
 @Composable
-private fun ChatBubble(message: ChatMessage) {
+private fun ChatBubble(message: com.nuanshidong.viewmodel.ChatMessage) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (message.sender == "user") {
@@ -233,26 +334,4 @@ private fun getWelcomeMessage(emotion: String): String {
     }
 }
 
-/**
- * AI占位回复（后续接入真实AI）
- */
-private fun getAIResponse(emotion: String, userMessage: String): String {
-    // 这里是占位逻辑，后续会接入真实AI服务
-    val responses = listOf(
-        "我理解你的感受。能多说说吗？",
-        "听起来这对你很重要。",
-        "我在认真听你说。继续。",
-        "这种感觉确实不容易。",
-        "谢谢你愿意和我分享这些。",
-        "你的感受是合理的。"
-    )
-    return responses.random()
-}
-
-/**
- * 聊天消息数据类
- */
-data class ChatMessage(
-    val sender: String, // "user" 或 "ai"
-    val text: String
-)
+// 删除旧的ChatMessage数据类和getAIResponse函数，现在使用ViewModel中的实现
