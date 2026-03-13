@@ -1,4 +1,4 @@
-name: Build APK (Direct)
+name: Build APK with Debug
 
 on:
   push:
@@ -17,11 +17,51 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       
-      - name: Grant execute permission
-        run: chmod +x gradlew || echo "gradlew not found"
+      - name: Remove ALL wrapper files
+        run: |
+          echo "=== Removing all Gradle Wrapper files ==="
+          rm -rf gradle/wrapper
+          rm -f gradlew gradlew.bat
       
-      - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace
+      - name: Regenerate Gradle Wrapper
+        run: |
+          echo "=== Regenerating Gradle Wrapper ==="
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
+      
+      - name: Display Gradle version
+        run: |
+          echo "=== Gradle version ==="
+          ./gradlew --version
+          echo "=== Gradle info ==="
+          ./gradlew info --stacktrace
+      
+      - name: Build APK with full debug output
+        run: |
+          echo "=== Building APK with full debug ==="
+          ./gradlew assembleDebug --no-daemon --stacktrace --info --debug
+        continue-on-error: true
+      
+      - name: Display build output directory
+        if: always()
+        run: |
+          echo "=== Build output directory ==="
+          ls -laR app/build/outputs/ 2>/dev/null || echo "No outputs directory"
+          echo "=== Checking for APK ==="
+          find app/build -name "*.apk" 2>/dev/null | head -10 || echo "No APK found"
+          echo "=== Checking for build failures ==="
+          find app/build -name "*.log" 2>/dev/null || echo "No log files"
+      
+      - name: Upload all build outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-outputs
+          path: |
+            app/build/outputs/
+            app/build/reports/
+            app/build/logs/
+          if-no-files-found: ignore
       
       - name: Upload APK
         if: success()
@@ -30,13 +70,3 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
-      
-      - name: Upload logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: |
-            app/build/reports/
-            app/build/logs/
-          if-no-files-found: ignore
