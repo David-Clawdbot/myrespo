@@ -1,4 +1,4 @@
-name: Build APK (Regenerate All)
+name: Build APK (Direct)
 
 on:
   push:
@@ -15,31 +15,13 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
       
-      - name: Remove ALL wrapper files and directories
-        run: |
-          echo "=== Cleaning up Gradle Wrapper ==="
-          rm -rf gradle/wrapper
-          rm -f gradlew gradlew.bat
-      
-      - name: Regenerate entire Gradle Wrapper
-        run: |
-          echo "=== Regenerating Wrapper with system Gradle ==="
-          gradle wrapper --gradle-version 8.2
-          chmod +x gradlew
+      - name: Grant execute permission
+        run: chmod +x gradlew || echo "gradlew not found"
       
       - name: Build APK
-        run: |
-          echo "=== Building APK with gradlew ==="
-          ./gradlew assembleDebug --no-daemon --stacktrace
-      
-      - name: List build outputs
-        if: always()
-        run: |
-          echo "=== Build directory contents ==="
-          ls -laR app/build/outputs/ 2>/dev/null || echo "No outputs directory"
-          echo "=== Checking for APK ==="
-          find app/build -name "*.apk" 2>/dev/null || echo "No APK found"
+        run: ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace
       
       - name: Upload APK
         if: success()
@@ -49,13 +31,12 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
       
-      - name: Upload build logs
+      - name: Upload logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs
           path: |
-            app/build/outputs/logs/
             app/build/reports/
-            app/build/reports/
+            app/build/logs/
           if-no-files-found: ignore
